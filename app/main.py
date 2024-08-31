@@ -1,5 +1,7 @@
 import sys
 
+builtins = ["exit", "echo", "type"]
+
 def ask() -> None:
     # Signal for input
     send("$ ")
@@ -20,6 +22,11 @@ def main():
             sys.exit(int(msg[1]))
         case "echo":
             send(" ".join(msg[1:]) + "\n")
+        case "type":
+            if msg[1] in builtins:
+                send(msg[1] + " is a shell builtin\n")
+            else:
+                send(msg[1] + ": not found\n")
         case _:
             send(f"{msg[0]}: command not found\n")
     main()
