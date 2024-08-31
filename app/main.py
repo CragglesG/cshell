@@ -1,9 +1,7 @@
 import sys
 import os
-from typing import List
 
 class Shell:
-
     def __init__(self):
         self.builtins = ["exit", "echo", "type"]
         self.path = os.environ.get("PATH").split(":")
@@ -41,13 +39,12 @@ class Shell:
                     self.send(f"{msg[1]} is {self.path_files[msg[1]]}\n")
                 else:
                     self.send(msg[1] + ": not found\n")
+            case cmd if cmd in self.path_files.keys():
+                os.system(f"{self.path_files[cmd]} {" ".join(msg[1:])}")
             case _:
                 self.send(f"{msg[0]}: command not found\n")
         self.main()
-
         
-        
-
 
 if __name__ == "__main__":
     shell_instance = Shell()
