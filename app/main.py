@@ -18,8 +18,6 @@ def main():
             sys.stdout.write(f"{msg[0]}: command not found\n")
             sys.stdout.flush()
             continue
-        
-
 
         
         
