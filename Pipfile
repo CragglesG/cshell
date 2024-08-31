@@ -12,6 +12,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+Levenshtein = "0.25.1"
 
 [dev-packages]
 
