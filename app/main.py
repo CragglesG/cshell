@@ -6,8 +6,13 @@ def main():
     sys.stdout.write("$ ")
     sys.stdout.flush()
 
-    # Wait for user input
-    input()
+    # List of known commands
+    cmds = []
+
+    # Verify if use input is a command
+    msg = input()
+    if msg not in cmds:
+        print(f"{msg}: command not found")
 
 
 if __name__ == "__main__":
