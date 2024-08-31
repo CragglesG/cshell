@@ -43,6 +43,8 @@ class Shell:
             case "cd":
                 if os.path.exists(msg[1]):
                     os.chdir(msg[1])
+                elif msg[1] == "~":
+                    os.chdir(os.environ.get("HOME"))
                 else:
                     self.send(f"cd: {msg[1]}: No such file or directory\n")
             case cmd if cmd in self.path_files.keys():
