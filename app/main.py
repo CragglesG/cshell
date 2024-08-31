@@ -1,39 +1,54 @@
 import sys
+import os
+from typing import List
 
-builtins = ["exit", "echo", "type"]
+class Shell:
 
-def ask() -> None:
-    # Signal for input
-    send("$ ")
+    def __init__(self):
+        self.builtins = ["exit", "echo", "type"]
+        self.path = os.environ.get("PATH").split(":")
+        self.path_files = {}
 
-    msg = input()
-    return msg.split(" ")
+        for entry in self.path:
+            if os.path.exists(entry):
+                for content in os.scandir(entry):
+                    if os.path.isfile(content.path):
+                        self.path_files[content.name] = content.path
+                    
+    def ask(self) -> None:
+        # Signal for input
+        self.send("$ ")
 
+        msg = input()
+        return msg.split(" ")
 
-def send(msg: str) -> None:
-    sys.stdout.write(msg)
-    sys.stdout.flush()
+    def send(self, msg: str) -> None:
+        sys.stdout.write(msg)
+        sys.stdout.flush()
 
-def main():
-    # Verify if use input is a command
-    msg = ask()
-    match msg[0]:
-        case "exit":
-            sys.exit(int(msg[1]))
-        case "echo":
-            send(" ".join(msg[1:]) + "\n")
-        case "type":
-            if msg[1] in builtins:
-                send(msg[1] + " is a shell builtin\n")
-            else:
-                send(msg[1] + ": not found\n")
-        case _:
-            send(f"{msg[0]}: command not found\n")
-    main()
+    def main(self):
+        # Verify if use input is a command
+        msg = self.ask()
+        match msg[0]:
+            case "exit":
+                sys.exit(int(msg[1]))
+            case "echo":
+                self.send(" ".join(msg[1:]) + "\n")
+            case "type":
+                if msg[1] in self.builtins:
+                    self.send(msg[1] + " is a shell builtin\n")
+                elif msg[1] in self.path_files.keys():
+                    self.send(f"{msg[1]} is {self.path_files[msg[1]]}\n")
+                else:
+                    self.send(msg[1] + ": not found\n")
+            case _:
+                self.send(f"{msg[0]}: command not found\n")
+        self.main()
 
         
         
 
 
 if __name__ == "__main__":
-    main()
+    shell_instance = Shell()
+    shell_instance.main()
