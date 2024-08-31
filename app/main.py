@@ -59,7 +59,7 @@ class Shell:
                     elif msg[1] in self.path_files.keys():
                         self.send(f"{msg[1]} is {self.path_files[msg[1]]}\n")
                     else:
-                        self.send(f"{msg[1]}: not found\n")
+                        self.send(f"type: {msg[1]}: not found\n")
 
             # Print the working directory
             case "pwd":
