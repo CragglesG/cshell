@@ -3,7 +3,7 @@ import os
 
 class Shell:
     def __init__(self):
-        self.builtins = ["exit", "echo", "type", "pwd"]
+        self.builtins = ["exit", "echo", "type", "pwd", "cd"]
         self.path = os.environ.get("PATH").split(":")
         self.path_files = {}
 
@@ -25,7 +25,6 @@ class Shell:
         sys.stdout.flush()
 
     def main(self):
-        # Verify if use input is a command
         msg = self.ask()
         match msg[0]:
             case "exit":
@@ -41,6 +40,11 @@ class Shell:
                     self.send(msg[1] + ": not found\n")
             case "pwd":
                 self.send(os.getcwd() + "\n")
+            case "cd":
+                if os.path.exists(msg[1]):
+                    os.chdir(msg[1])
+                else:
+                    self.send(f"cd: {msg[1]}: No such file or directory\n")
             case cmd if cmd in self.path_files.keys():
                 os.system(f"{self.path_files[cmd]} {" ".join(msg[1:])}")
             case _:
