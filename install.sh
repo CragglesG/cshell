@@ -1,2 +1,4 @@
-mkdir ~/.cshell/
-cp ./* -r ~/.cshell/
+#! /bin/bash
+
+mkdir -p ~/.cshell/
+rsync -r ./. --exclude .git ~/.cshell/
