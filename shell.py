@@ -7,28 +7,42 @@ import importlib
 from shell_builtins import ShellBuiltins
 from shell_extensions import ShellExtension
 from typing import Tuple, Callable
+from colours import RED, DEFAULT
 
 class Shell:
     def __init__(self):
+        # Initialize the readline module
+        readline.set_auto_history(True)
+        readline.read_history_file(os.path.expanduser("~/.cshell/.history"))
+        readline.set_history_length(100)
+        readline.read_init_file(os.path.expanduser("~/.cshell/.inputrc"))
+
         # Set up the utility variables
-        self.builtins = ShellBuiltins()
-        self.path = os.environ.get("PATH").split(":")
         self.path_files = {}
         self.extensions = {}
-
+        self.load_extensions()
+        self.builtins = ShellBuiltins(readline, self.path_files, self.extensions)
+        self.path = os.environ.get("PATH").split(":")
+        
         # Fill up self.path_files with {name:path} entries
         for entry in self.path:
             if os.path.exists(entry):
                 for content in os.scandir(entry):
                     if os.path.isfile(content.path):
                         self.path_files[content.name] = content.path
+    
+    def __call__(self):
+            """Call the main method."""
+            self.main()
         
-        readline.set_auto_history(True)
-        readline.read_history_file(os.path.expanduser("~/.cshell/.history"))
-        readline.set_history_length(100)
-        readline.read_init_file(os.path.expanduser("~/.cshell/.inputrc"))
+    def __str__(self):
+        return "CShell Instance"
+    
+    def __repr__(self):
+        return "Shell()"
     
     def load_extensions(self):
+        # Load all extensions from the extensions directory
         extensions_dir = "extensions"
         if not os.path.isdir(extensions_dir):
             return
@@ -38,11 +52,12 @@ class Shell:
                 module = importlib.import_module(f"extensions.{module_name}")
                 for attr in dir(module):
                     cls = getattr(module, attr)
-                    if isinstance(cls, type) and issubclass(cls, ShellExtension):
+                    if isinstance(cls, type) and issubclass(cls, ShellExtension) and cls != ShellExtension:
                         extension = cls()
                         extension.register(self.append_extensions)
     
     def append_extensions(self, new_builtin: Tuple[str, Callable]) -> None:
+        # Append the new extension to the extensions dictionary
         self.extensions[new_builtin[0]] = new_builtin[1]
                     
     def ask(self) -> None:
@@ -130,24 +145,33 @@ class Shell:
             # case "history":
             #     self.send("\n".join(self.history) + "\n")    
             
+            # Execute builtins
             case builtin if builtin in self.builtins.keys():
-                self.builtins[builtin](msg)
+                to_send = self.builtins[builtin](msg)
+                if type(to_send) == list:
+                    for string in to_send:
+                        self.send(string)
             
+            # Execute extensions
             case extension if extension in self.extensions.keys():
-                self.extensions[extension](msg, self.path_files, self.builtins)
+                to_send = self.extensions[extension](msg, self.path_files, self.builtins)
+                if type(to_send) == list:
+                    for string in to_send:
+                        self.send(string)
 
             # Execute executables in path
             case cmd if cmd in self.path_files.keys():
                 os.system(f"{self.path_files[cmd]} {" ".join(msg[1:])}")
 
+            # Handle empty input
             case "":
                 self.send("\n")
             
             # Catch all other cases
             case _:
-                self.send(f"{msg[0]}: command not found\n")
+                self.send(f"{RED}{msg[0]}: command not found{DEFAULT}\n")
                 distances = {'null':0}
-                for cmd in [*self.builtins, *self.path_files]:
+                for cmd in [*self.builtins, *self.path_files, *self.extensions]:
                     distances[cmd] = Levenshtein.jaro(msg[0], cmd, score_cutoff=0.8)
                 if max(distances, key=distances.get) != 'null':
                     self.send(f"Did you mean {max(distances, key=distances.get)}?\n")
@@ -157,14 +181,3 @@ class Shell:
             self.send(f"Oops! It looks like an error occured! Here's some more details: {err}\n")
         finally:
             self.main()
-        
-        def __str__(self):
-            return "CShell Instance"
-        
-        def __repr__(self):
-            return "Shell()"
-        
-
-if __name__ == "__main__":
-    shell_instance = Shell()
-    shell_instance.main()

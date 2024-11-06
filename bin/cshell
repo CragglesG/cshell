@@ -1,0 +1,8 @@
+#! /bin/bash
+
+python3 ~/.cshell/run_shell.py
+
+while [ $? -eq 121 ];
+do
+    python3 ~/.cshell/run_shell.py
+done

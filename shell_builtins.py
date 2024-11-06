@@ -1,14 +1,35 @@
 import readline
 import os
 from typing import List
+from colours import RED, DEFAULT, BLUE
 
 class ShellBuiltins:
     """Built-in CShell commands."""
 
-    def __init__(self, readline_instance: readline) -> None:
+    def __init__(self, readline_instance: readline, path_files: dict, extensions: dict) -> None:
         self.readline = readline_instance
         self.builtins = {"exit": self.exit, "echo": self.echo, "type": self.type, "pwd": self.pwd, "cd": self.cd, "builtins": self.builtins_func, "reload": self.reload, "history": self.history}
+        self.path_files = path_files
+        self.extensions = extensions
 
+    def __getitem__(self, key: str) -> List[str]:
+        return self.builtins[key]
+    
+    def keys(self) -> List[str]:
+        return list(self.builtins.keys())
+    
+    def __iter__(self) -> List[str]:
+        return iter(self.builtins)
+    
+    def __len__(self) -> int:
+        return len(self.builtins)
+    
+    def __str__(self) -> str:
+        return ", ".join(self.builtins.keys())
+    
+    def __repr__(self) -> str:
+        return f"ShellBuiltins([{'\", \"'.join(self.builtins) + '\"'}])"
+    
     def exit(self, msg: list[str] = ["exit"]) -> None:
         self.readline.append_history_file(self.readline.get_current_history_length(), os.path.expanduser("~/.cshell/.history"))
 
@@ -40,10 +61,14 @@ class ShellBuiltins:
                 to_send.append(msg[1] + " is a shell builtin\n")
             elif msg[1] in self.path_files.keys():
                 to_send.append(f"{msg[1]} is {self.path_files[msg[1]]}\n")
+            elif msg[1] in self.extensions.keys():
+                to_send.append(f"{msg[1]} is a shell extension\n")
             else:
-                to_send.append(f"type: {msg[1]}: not found\n")
+                to_send.append(f"{RED}type: {msg[1]}: not found{DEFAULT}\n")
         else:
-            to_send.append("type: not enough arguments\n")
+            to_send.append(f"{RED}type: not enough arguments{DEFAULT}\n")
+        
+        return to_send
     
     def pwd(self, msg: List[str]) -> List[str]:
         return [os.getcwd() + "\n"]
@@ -84,20 +109,3 @@ class ShellBuiltins:
             history = f.readlines()
         return ["\n".join(history) + "\n"]
     
-    def __getitem__(self, key: str) -> List[str]:
-        return self.builtins[key]
-    
-    def keys(self) -> List[str]:
-        return list(self.builtins.keys())
-    
-    def __iter__(self) -> List[str]:
-        return iter(self.builtins)
-    
-    def __len__(self) -> int:
-        return len(self.builtins)
-    
-    def __str__(self) -> str:
-        return ", ".join(self.builtins.keys())
-    
-    def __repr__(self) -> str:
-        return f"ShellBuiltins([{'\", \"'.join(self.builtins) + '\"'}])"

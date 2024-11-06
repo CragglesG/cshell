@@ -1,8 +1,0 @@
-#! /bin/bash
-
-python3 ~/.cshell/app/main.py
-
-while [ $? -eq 121 ];
-do
-    python3 ~/.cshell/app/main.py
-done
