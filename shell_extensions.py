@@ -8,8 +8,8 @@ class ShellExtension:
         self.name = name
         self.func = func
 
-    def __call__(self, msg: List[str], pathfiles: List[str], builtins: ShellBuiltins, *args: Any, **kwds: Any) -> List[str]:
-        return self.func(msg, pathfiles, builtins, *args, **kwds)
+    def __call__(self, msg: List[str], pathfiles: List[str], builtins: ShellBuiltins, send: Callable, *args: Any, **kwds: Any) -> List[str]:
+        self.func(msg, pathfiles, builtins, send, *args, **kwds)
     
     def __str__(self) -> str:
         return self.name

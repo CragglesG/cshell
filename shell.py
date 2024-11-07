@@ -7,7 +7,7 @@ import importlib
 from shell_builtins import ShellBuiltins
 from shell_extensions import ShellExtension
 from typing import Tuple, Callable
-from colours import RED, DEFAULT
+from colours import RED, DEFAULT, BLUE
 
 class Shell:
     def __init__(self):
@@ -21,7 +21,7 @@ class Shell:
         self.path_files = {}
         self.extensions = {}
         self.load_extensions()
-        self.builtins = ShellBuiltins(readline, self.path_files, self.extensions)
+        self.builtins = ShellBuiltins(readline, self.path_files, self.extensions, self.send)
         self.path = os.environ.get("PATH").split(":")
         
         # Fill up self.path_files with {name:path} entries
@@ -147,17 +147,11 @@ class Shell:
             
             # Execute builtins
             case builtin if builtin in self.builtins.keys():
-                to_send = self.builtins[builtin](msg)
-                if type(to_send) == list:
-                    for string in to_send:
-                        self.send(string)
+                self.builtins[builtin](msg)
             
             # Execute extensions
             case extension if extension in self.extensions.keys():
-                to_send = self.extensions[extension](msg, self.path_files, self.builtins)
-                if type(to_send) == list:
-                    for string in to_send:
-                        self.send(string)
+                self.extensions[extension](msg, self.path_files, self.builtins, self.send)
 
             # Execute executables in path
             case cmd if cmd in self.path_files.keys():
@@ -174,10 +168,12 @@ class Shell:
                 for cmd in [*self.builtins, *self.path_files, *self.extensions]:
                     distances[cmd] = Levenshtein.jaro(msg[0], cmd, score_cutoff=0.8)
                 if max(distances, key=distances.get) != 'null':
-                    self.send(f"Did you mean {max(distances, key=distances.get)}?\n")
+                    self.send(f"{BLUE}Did you mean {max(distances, key=distances.get)}?{DEFAULT}\n")
         try:        
             self.main()
         except Exception as err:
             self.send(f"Oops! It looks like an error occured! Here's some more details: {err}\n")
+            with open("error.log", "a") as f:
+                f.write(f"Error: {err}\n")
         finally:
             self.main()
