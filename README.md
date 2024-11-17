@@ -9,6 +9,7 @@ _Want to contribute? You can find good first issues [here](https://github.com/Cr
 
 - [Installation Guide](#installation-guide)
 - [Features](#features)
+- [`ShellExtension` and the CShell Extension Framework](#shell-extension-and-the-cshell-extension-framework)
 
 ## Installation Guide
 
@@ -16,7 +17,7 @@ CShell ony supports Linux at this time. Support for macOS and Windows may come s
 
 To install CShell, execute this command:
 
-```
+```sh
 git clone https://github.com/CragglesG/cshell cshell-install && cd cshell-install && ./install.sh
 ```
 
@@ -38,3 +39,25 @@ CShell is currently under heavy development, and is not yet complete. Here's a l
 - Environment variables support
 - Built-in `PATH` support
 - Fallback to default system shell
+
+## `ShellExtension` and the CShell Extension Framework
+
+The CShell Extension Framework allows developers to extend CShell using the `ShellExtension` class. Extensions are provided with the user input, path files, and built-ins available in the current session, along with a function to display output to the user. Below is an example of a simple CShell extension:
+
+```python
+from shell_extensions import ShellExtension
+
+class TestExtension(ShellExtension):
+    def __init__(self):
+        super().__init__("test-extension", self.test)
+    
+    def test(self, msg, pathfiles, builtins, send):
+        send("This is a test extension\n")
+```
+
+The above extension displays the output `This is a test extension` to the user, followed by a newline. The newline is necessary to move the prompt to the next line. The `super().__init__` function takes two arguments, the extension command and the function to call.
+
+All extensions should be located in `~/.cshell/extensions/`. CShell will scan this folder for extensions and register them upon starting.
+
+> **Important:**
+> CShell first searches for commands in the built-ins dictionary, followed by the extensions dictionary, and finally the path files dictionary. Extensions can therefore override path files, but not built-ins.
