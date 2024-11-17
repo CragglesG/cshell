@@ -9,7 +9,7 @@ _Want to contribute? You can find good first issues [here](https://github.com/Cr
 
 - [Installation Guide](#installation-guide)
 - [Features](#features)
-- [`ShellExtension` and the CShell Extension Framework](#shell-extension-and-the-cshell-extension-framework)
+- [`ShellExtension` and the CShell Extension Framework](#shellextension-and-the-cshell-extension-framework)
 
 ## Installation Guide
 
