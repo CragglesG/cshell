@@ -1,5 +1,5 @@
 # CShell
-CShell is an extensible, in-development, POSIX-compliant shell made with Python.
+CShell is an extensible, POSIX-compliant shell made with Python.
 
 _Found a bug? Want a new feature? [Create an issue!](https://github.com/CragglesG/cshell/issues/new) (Please check for an existing one first to avoid duplicates.)_
 
@@ -31,7 +31,7 @@ You can now run CShell with the `cshell` command.
 
 ## Features
 
-CShell is currently under heavy development, and is not yet complete. Here's a list of features that are available now:
+Here's a list of features that are available in CShell:
 
 - `exit`, `echo`, `type`, `pwd`, `cd`, `builtins`, `reload`, and `history` built-ins
 - History and `.inputrc` support
